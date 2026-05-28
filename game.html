@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>登入系統</title>
+
+<style>
+    body{
+        font-family: Arial, sans-serif;
+        background:#f2f2f2;
+        display:flex;
+        justify-content:center;
+        align-items:center;
+        height:100vh;
+    }
+
+    .login-box{
+        background:#fff;
+        padding:30px;
+        border-radius:10px;
+        width:350px;
+        box-shadow:0 0 10px rgba(0,0,0,0.2);
+    }
+
+    h2{
+        text-align:center;
+    }
+
+    input[type=text],
+    input[type=password]{
+        width:100%;
+        padding:10px;
+        margin-top:10px;
+        border:1px solid #ccc;
+        border-radius:5px;
+        box-sizing:border-box;
+    }
+
+    button{
+        width:100%;
+        margin-top:15px;
+        padding:10px;
+        border:none;
+        background:#007bff;
+        color:white;
+        border-radius:5px;
+        cursor:pointer;
+    }
+
+    button:hover{
+        background:#0056b3;
+    }
+
+    .status{
+        margin-top:15px;
+        text-align:center;
+        color:green;
+    }
+
+    .file-box{
+        margin-top:15px;
+    }
+</style>
+</head>
+<body>
+
+<div class="login-box">
+
+    <h2>登入系統</h2>
+
+    <input type="text" id="username" placeholder="帳號">
+
+    <input type="password" id="password" placeholder="密碼">
+
+    <div class="file-box">
+        <input type="file" id="txtFile" accept=".txt">
+    </div>
+
+    <button onclick="login()">登入</button>
+
+    <div class="status" id="status"></div>
+
+</div>
+
+<script>
+
+// 匯入 TXT 檔案
+document.getElementById('txtFile').addEventListener('change', function(event){
+
+    const file = event.target.files[0];
+
+    if(!file){
+        return;
+    }
+
+    const reader = new FileReader();
+
+    reader.onload = function(e){
+
+        const text = e.target.result;
+
+        /*
+            TXT 格式:
+
+            username=admin
+            password=123456
+        */
+
+        const lines = text.split('\n');
+
+        let username = '';
+        let password = '';
+
+        lines.forEach(line => {
+
+            const [key, value] = line.split('=');
+
+            if(!key || !value){
+                return;
+            }
+
+            if(key.trim() === 'username'){
+                username = value.trim();
+            }
+
+            if(key.trim() === 'password'){
+                password = value.trim();
+            }
+
+        });
+
+        // 帶入欄位
+        document.getElementById('username').value = username;
+        document.getElementById('password').value = password;
+
+        document.getElementById('status').innerText =
+            'TXT 帳號密碼已載入';
+
+        // 自動登入
+        login();
+
+    };
+
+    reader.readAsText(file);
+
+});
+
+
+// 登入功能
+function login(){
+
+    const user = document.getElementById('username').value;
+    const pass = document.getElementById('password').value;
+
+    if(user && pass){
+
+        document.getElementById('status').innerText =
+            `登入成功：${user}`;
+
+    }else{
+
+        document.getElementById('status').innerText =
+            '請輸入帳號密碼';
+
+    }
+
+}
+
+</script>
+
+</body>
+</html>
