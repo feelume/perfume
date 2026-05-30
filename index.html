@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>情緒香調心理測驗</title>
+
+<style>
+*{box-sizing:border-box;}
+
+body{
+    margin:0;
+    font-family:"Microsoft JhengHei",sans-serif;
+    background:linear-gradient(135deg,#ffe0ec,#fff5d6);
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    padding:20px;
+}
+
+.container{
+    width:100%;
+    max-width:700px;
+    background:white;
+    border-radius:25px;
+    padding:35px;
+    box-shadow:0 10px 30px rgba(0,0,0,0.15);
+}
+
+h1{text-align:center;margin-bottom:10px;}
+.subtitle{text-align:center;color:#777;margin-bottom:30px;}
+
+#question{
+    font-size:24px;
+    margin-bottom:25px;
+    line-height:1.5;
+}
+
+.choice-btn{
+    width:100%;
+    border:none;
+    padding:16px;
+    margin-bottom:15px;
+    border-radius:15px;
+    font-size:16px;
+    cursor:pointer;
+    transition:0.25s;
+    background:#f5f5f5;
+}
+
+.choice-btn:hover{
+    transform:scale(1.02);
+    background:#ffd6e4;
+}
+
+.progress{
+    margin-bottom:25px;
+    color:#888;
+    font-size:14px;
+}
+
+#result{display:none;text-align:center;}
+
+.result-title{
+    font-size:34px;
+    margin-bottom:15px;
+}
+
+.result-text{
+    font-size:18px;
+    color:#555;
+    margin-bottom:15px;
+    line-height:1.8;
+}
+
+.quote{
+    font-size:16px;
+    color:#888;
+    font-style:italic;
+    margin-top:10px;
+}
+
+.restart-btn{
+    margin-top:30px;
+    border:none;
+    background:#ff8fb1;
+    color:white;
+    padding:14px 25px;
+    border-radius:15px;
+    font-size:16px;
+    cursor:pointer;
+}
+.restart-btn:hover{opacity:0.8;}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<div id="quiz">
+<h1>情緒香調心理測驗</h1>
+<div class="subtitle">測出你現在最需要的療癒狀態 ✨</div>
+
+<div class="progress" id="progress"></div>
+<div id="question"></div>
+<div id="choices"></div>
+</div>
+
+<div id="result">
+<div class="result-title" id="resultTitle"></div>
+<div class="result-text" id="resultText"></div>
+<div class="quote" id="resultQuote"></div>
+
+<button class="restart-btn" onclick="location.reload()">
+重新測驗
+</button>
+</div>
+
+</div>
+
+<script>
+
+const results = {
+sad:{
+title:"【難過｜溫暖】",
+messages:[
+"你最近其實有點累了，但一直撐著。",
+"不是不堅強，只是需要被好好理解。",
+"有些情緒沒有說出口，但它一直都在。"
+],
+quotes:[
+"溫柔不是軟弱，而是一種選擇。",
+"被理解，本身就是一種療癒。"
+]
+},
+angry:{
+title:"【生氣｜釋放】",
+messages:[
+"你壓抑的情緒其實已經累積很久了。",
+"有些不舒服，不說出來只會更重。",
+"你需要的不是忍耐，而是出口。"
+],
+quotes:[
+"情緒不是敵人，它只是想被看見。",
+"真正的釋放，是允許自己不再壓抑。"
+]
+},
+anxious:{
+title:"【焦慮｜舒緩】",
+messages:[
+"你的腦袋最近停不太下來。",
+"你一直在想「如果」，卻忘了「現在」。",
+"放慢一點，其實沒有你想的那麼急。"
+],
+quotes:[
+"慢一點，世界不會因此崩塌。",
+"安心，是一種練習。"
+]
+},
+happy:{
+title:"【開心｜明亮】",
+messages:[
+"你最近其實有一點輕盈的快樂。",
+"有些小事正在讓你變得柔軟。",
+"你正在靠近喜歡的生活狀態。"
+],
+quotes:[
+"快樂不是結果，而是片刻。",
+"光會留下來，在你願意感受的時候。"
+]
+},
+love:{
+title:"【幸福｜甜蜜】",
+messages:[
+"你其實很重視被在乎的感覺。",
+"你在意連結，也願意付出情感。",
+"有人陪伴對你來說很重要。"
+],
+quotes:[
+"被珍惜，是最安靜的幸福。",
+"愛存在於日常的細節裡。"
+]
+},
+annoy:{
+title:"【煩躁｜降溫】",
+messages:[
+"你最近有點被生活壓得喘不過氣。",
+"一切太多的時候，你只想安靜一下。",
+"你只是需要一點空白。"
+],
+quotes:[
+"停一下，不是放棄，是整理。",
+"冷靜不是沒有情緒，而是選擇不被淹沒。"
+]
+},
+tired:{
+title:"【疲倦｜喚醒】",
+messages:[
+"你其實已經累很久了，只是還在撐。",
+"你需要的不是更多努力，而是休息。",
+"身體和心都在提醒你該慢下來了。"
+],
+quotes:[
+"休息，是為了重新開始。",
+"你不需要一直很有力量。"
+]
+}
+};
+
+const questions = [
+{
+question:"最近的你，狀態比較像？",
+choices:[
+{text:"喜歡待在讓人安心的小世界裡",type:"sad"},
+{text:"覺得需要找個出口發洩一下",type:"angry"},
+{text:"想找個地方靜靜整理思緒",type:"anxious"},
+{text:"對新鮮事有點期待",type:"happy"}
+]
+},
+{
+question:"如果突然多出一個空閒下午，你最想？",
+choices:[
+{text:"蓋著毯子看劇、抱抱枕",type:"sad"},
+{text:"去喝杯冰飲、吹吹風",type:"annoy"},
+{text:"跟喜歡的人一起出去",type:"love"},
+{text:"睡一覺補足精神",type:"tired"}
+]
+},
+{
+question:"直覺選一個現在最吸引你的畫面",
+choices:[
+{text:"窩在被子裡看著窗外發呆",type:"sad"},
+{text:"夜晚街道獨自散步",type:"angry"},
+{text:"草地上躺著看天空",type:"anxious"},
+{text:"和朋友笑到停不下來",type:"love"}
+]
+},
+{
+question:"如果今天不用趕時間，你會怎麼度過？",
+choices:[
+{text:"慢慢待著，做喜歡的小事",type:"love"},
+{text:"去安靜舒服的地方待一下",type:"anxious"},
+{text:"出門走走，把情緒丟掉",type:"angry"},
+{text:"睡到自然醒再開始一天",type:"tired"}
+]
+},
+{
+question:"今天想選哪種天氣？",
+choices:[
+{text:"微風吹過的晴朗午後",type:"happy"},
+{text:"夜晚有風的城市",type:"angry"},
+{text:"剛下完雨的清爽空氣",type:"annoy"},
+{text:"晴空下悠閒散步的天氣",type:"love"}
+]
+},
+{
+question:"如果今天有人突然送你小禮物，你最開心收到？",
+choices:[
+{text:"軟軟又好抱的東西",type:"sad"},
+{text:"一張能去玩、放鬆心情的票券",type:"happy"},
+{text:"看了心情會變好的小東西",type:"annoy"},
+{text:"一份能立刻補充能量的食物",type:"tired"}
+]
+}
+];
+
+let current = 0;
+let score = {
+sad:0, angry:0, anxious:0,
+happy:0, love:0, annoy:0, tired:0
+};
+
+function loadQ(){
+const q = questions[current];
+
+document.getElementById("progress").innerText =
+`第 ${current+1} 題 / ${questions.length}`;
+
+document.getElementById("question").innerText = q.question;
+
+let html = "";
+q.choices.forEach(c=>{
+html += `<button class="choice-btn" onclick="pick('${c.type}')">${c.text}</button>`;
+});
+
+document.getElementById("choices").innerHTML = html;
+}
+
+function pick(type){
+score[type]++;
+current++;
+
+if(current < questions.length){
+loadQ();
+}else{
+show();
+}
+}
+
+function show(){
+
+document.getElementById("quiz").style.display = "none";
+document.getElementById("result").style.display = "block";
+
+let best = Object.keys(score).reduce((a,b)=>
+score[a] > score[b] ? a : b
+);
+
+const res = results[best];
+
+const msg = res.messages[Math.floor(Math.random()*res.messages.length)];
+const quote = res.quotes[Math.floor(Math.random()*res.quotes.length)];
+
+document.getElementById("resultTitle").innerText = res.title;
+document.getElementById("resultText").innerText = msg;
+document.getElementById("resultQuote").innerText = quote;
+}
+
+loadQ();
+
+</script>
+
+</body>
+</html>
